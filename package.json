@@ -1,5 +1,7 @@
 {
   "dependencies": {
+    "@modelcontextprotocol/server-github": "^2025.4.8",
+    "@supabase/mcp-server-supabase": "^0.3.5",
     "@vercel/sdk": "^1.6.1"
   }
 }
