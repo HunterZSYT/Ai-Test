@@ -1,0 +1,51 @@
+{
+  "inputs": [
+    {
+      "type": "promptString",
+      "id": "supabase-access-token",
+      "description": "Supabase personal access token",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "vercel-bearer-token",
+      "description": "Vercel bearer token",
+      "password": true
+    },
+    {
+      "type": "promptString",
+      "id": "github-access-token",
+      "description": "GitHub personal access token",
+      "password": true
+    }
+  ],
+  "servers": {
+    "supabase": {
+      "command": "npx",
+      "args": ["-y", "@supabase/mcp-server-supabase@latest"],
+      "env": {
+        "SUPABASE_ACCESS_TOKEN": "${input:supabase-access-token}"
+      }
+    },
+    "vercel": {
+      "command": "npx",
+      "args": [
+        "-y", 
+        "--package", 
+        "@vercel/sdk", 
+        "--", 
+        "mcp", 
+        "start", 
+        "--bearer-token", 
+        "${input:vercel-bearer-token}"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github@latest"],
+      "env": {
+        "GITHUB_TOKEN": "${input:github-access-token}"
+      }
+    }
+  }
+}
