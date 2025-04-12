@@ -1,4 +1,4 @@
-# Ai-Test
+# Full-Stack-MCP
 
 A project that integrates with various cloud platforms using Model Context Protocol (MCP).
 
@@ -13,8 +13,8 @@ This project provides integration with the following platforms:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/your-username/Ai-Test.git
-cd Ai-Test
+git clone https://github.com/HunterZSYT/Full-Stack-MCP.git
+cd Full-Stack-MCP
 ```
 
 2. Install dependencies:
