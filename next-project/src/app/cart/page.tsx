@@ -95,18 +95,23 @@ export default function CartPage() {
 
       if (error) throw error;
 
+      // Filter out any items with missing product data
+      const validCartItems = cartItems?.filter(item => 
+        item.product && item.product.length > 0
+      ) || [];
+
       // Calculate subtotal
-      const subtotal = cartItems?.reduce((total, item) => {
+      const subtotal = validCartItems.reduce((total, item) => {
         // Access the first item in the arrays
         const productData = item.product[0];
         const variantData = item.variant?.[0];
         const price = variantData?.price ?? productData.price;
         
         return total + (price * item.quantity);
-      }, 0) || 0;
+      }, 0);
 
       setCart({
-        items: cartItems || [],
+        items: validCartItems,
         isLoading: false,
         error: null,
         subtotal

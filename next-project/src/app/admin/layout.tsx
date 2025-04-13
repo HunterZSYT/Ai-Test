@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { createServerClient, requireAdmin } from '@/lib/supabase-server';
+import { requireAdmin } from '@/lib/supabase-server';
 
 export const metadata = {
   title: "Admin - E-commerce Dashboard",

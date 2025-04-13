@@ -1,6 +1,5 @@
 import { createServerClient, requireAdmin } from '@/lib/supabase-server';
 import Link from 'next/link';
-import { Button } from '@/components/ui/button';
 
 export const metadata = {
   title: "Users Management - Admin Dashboard",

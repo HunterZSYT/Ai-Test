@@ -80,6 +80,7 @@ export default function UserEditForm({ user }: { user: UserProfile }) {
           <FormInput
             id="first_name"
             name="first_name"
+            type="text"
             label="First Name"
             value={formData.first_name}
             onChange={handleChange}
@@ -88,6 +89,7 @@ export default function UserEditForm({ user }: { user: UserProfile }) {
           <FormInput
             id="last_name"
             name="last_name"
+            type="text"
             label="Last Name"
             value={formData.last_name}
             onChange={handleChange}

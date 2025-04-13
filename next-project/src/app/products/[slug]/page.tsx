@@ -43,8 +43,18 @@ async function getRelatedProducts(categoryId: string, currentProductId: string) 
   return data || [];
 }
 
-export default async function ProductPage({ params }: { params: { slug: string } }) {
-  const product = await getProduct(params.slug);
+interface ProductPageProps {
+  params: {
+    slug: string;
+  };
+}
+
+export default async function ProductPage({ params }: ProductPageProps) {
+  // Wait for params to be available
+  const slug = params?.slug;
+  if (!slug) notFound();
+  
+  const product = await getProduct(slug);
 
   if (!product) {
     notFound();

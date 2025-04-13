@@ -2,11 +2,8 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { supabase } from "@/lib/supabase";
-import { getSessionId } from "@/lib/supabase";
-import { Button } from "@/components/ui/button";
+import { supabase, getSessionId } from "@/lib/supabase";
 
 interface User {
   id: string;
