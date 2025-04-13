@@ -20,12 +20,12 @@ interface CartItem {
     price: number;
     slug: string;
     product_images: { url: string; alt_text: string | null }[];
-  };
+  }[];  // Changed to array type to match Supabase response
   variant?: {
     id: string;
     name: string;
     price: number | null;
-  };
+  }[];  // Changed to array type to match Supabase response
 }
 
 interface CartState {
@@ -97,7 +97,11 @@ export default function CartPage() {
 
       // Calculate subtotal
       const subtotal = cartItems?.reduce((total, item) => {
-        const price = item.variant?.price ?? item.product.price;
+        // Access the first item in the arrays
+        const productData = item.product[0];
+        const variantData = item.variant?.[0];
+        const price = variantData?.price ?? productData.price;
+        
         return total + (price * item.quantity);
       }, 0) || 0;
 
@@ -107,12 +111,13 @@ export default function CartPage() {
         error: null,
         subtotal
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error fetching cart:", error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to load cart";
       setCart(prev => ({ 
         ...prev, 
         isLoading: false, 
-        error: error.message || "Failed to load cart" 
+        error: errorMessage 
       }));
     }
   };
@@ -130,7 +135,7 @@ export default function CartPage() {
       if (error) throw error;
 
       fetchCart(); // Refresh cart after update
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error updating quantity:", error);
       alert("Failed to update quantity");
     }
@@ -148,7 +153,7 @@ export default function CartPage() {
 
       fetchCart(); // Refresh cart after removal
       router.refresh(); // Refresh navigation to update cart count
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Error removing item:", error);
       alert("Failed to remove item");
     }
@@ -185,7 +190,7 @@ export default function CartPage() {
       {!cart.isLoading && cart.items.length === 0 && (
         <div className="text-center py-12 bg-gray-50 rounded-lg">
           <h2 className="text-2xl font-medium text-gray-900 mb-4">Your cart is empty</h2>
-          <p className="text-gray-600 mb-6">Looks like you haven't added anything to your cart yet.</p>
+          <p className="text-gray-600 mb-6">Looks like you haven&apos;t added anything to your cart yet.</p>
           <Link href="/products">
             <Button>Start Shopping</Button>
           </Link>
@@ -219,7 +224,12 @@ export default function CartPage() {
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
                   {cart.items.map((item) => {
-                    const itemPrice = item.variant?.price ?? item.product.price;
+                    // Access the first item in the product and variant arrays
+                    const productData = item.product[0];
+                    const variantData = item.variant?.[0];
+                    
+                    // Use the variant price if available, otherwise use the product price
+                    const itemPrice = variantData?.price ?? productData.price;
                     const itemTotal = itemPrice * item.quantity;
 
                     return (
@@ -227,10 +237,10 @@ export default function CartPage() {
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="flex items-center">
                             <div className="flex-shrink-0 h-16 w-16 relative">
-                              {item.product.product_images && item.product.product_images.length > 0 ? (
+                              {productData.product_images && productData.product_images.length > 0 ? (
                                 <Image
-                                  src={item.product.product_images[0].url}
-                                  alt={item.product.product_images[0].alt_text || item.product.name}
+                                  src={productData.product_images[0].url}
+                                  alt={productData.product_images[0].alt_text || productData.name}
                                   fill
                                   className="object-cover"
                                 />
@@ -242,14 +252,14 @@ export default function CartPage() {
                             </div>
                             <div className="ml-4">
                               <Link 
-                                href={`/products/${item.product.slug}`}
+                                href={`/products/${productData.slug}`}
                                 className="text-sm font-medium text-gray-900 hover:text-blue-600"
                               >
-                                {item.product.name}
+                                {productData.name}
                               </Link>
-                              {item.variant && (
+                              {variantData && (
                                 <p className="text-xs text-gray-500">
-                                  Option: {item.variant.name}
+                                  Option: {variantData.name}
                                 </p>
                               )}
                             </div>

@@ -31,8 +31,10 @@ export default function ResetPassword() {
         "Password reset instructions have been sent to your email"
       );
       setEmail("");
-    } catch (error: any) {
-      setError(error.message || "An error occurred while requesting password reset");
+    } catch (error: unknown) {
+      // Type-guard for the error object
+      const errorWithMessage = error as { message?: string };
+      setError(errorWithMessage.message || "An error occurred while requesting password reset");
     } finally {
       setIsLoading(false);
     }
@@ -46,7 +48,7 @@ export default function ResetPassword() {
             Reset your password
           </h2>
           <p className="mt-2 text-center text-sm text-gray-600">
-            Enter your email address and we'll send you a link to reset your password.
+            Enter your email address and we&apos;ll send you a link to reset your password.
           </p>
         </div>
 

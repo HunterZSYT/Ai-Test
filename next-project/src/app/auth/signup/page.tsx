@@ -48,7 +48,7 @@ export default function SignUp() {
 
     try {
       // Create user with Supabase Auth
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      const { data, error: authError } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
@@ -56,21 +56,28 @@ export default function SignUp() {
             first_name: formData.firstName,
             last_name: formData.lastName,
           },
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error("Auth error details:", authError);
+        throw authError;
+      }
+      
+      console.log("User creation successful:", data);
 
-      // Insert profile record (will be handled by Supabase functions/triggers)
+      // Show success message
       setSuccess(true);
 
       // After successful signup, redirect or show success message
       setTimeout(() => {
         router.push("/auth/signin");
       }, 3000);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Signup error:", error);
-      setError(error.message || "An error occurred during sign up");
+      const errorWithMessage = error as { message?: string; details?: string };
+      setError(errorWithMessage.message || errorWithMessage.details || "An error occurred during sign up");
     } finally {
       setIsLoading(false);
     }

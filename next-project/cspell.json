@@ -1,0 +1,14 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "words": [
+    "supabase",
+    "uuidv",
+    "ecommerce",
+    "maybeSingle"
+  ],
+  "ignorePaths": [
+    "node_modules",
+    ".next"
+  ]
+}

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 
 interface AddToCartButtonProps {
   productId: string;
-  variantId?: string;
+  variantId?: string | null;
   isInStock: boolean;
   showQuantity?: boolean;
   buttonText?: string;

@@ -309,3 +309,117 @@ export function formatPrice(cents: number): string {
 export function isInStock(inventory: number): boolean {
   return inventory > 0;
 }
+
+/**
+ * Upload a product image to the storage bucket
+ * @param file - The file to upload
+ * @param productId - The ID of the product the image belongs to
+ * @returns The public URL of the uploaded image
+ */
+export async function uploadProductImage(file: File, productId: string): Promise<string> {
+  const fileExt = file.name.split('.').pop();
+  const fileName = `${productId}/${uuidv4()}.${fileExt}`;
+  const filePath = `${fileName}`;
+  
+  // Upload to storage
+  const { error: uploadError } = await supabase.storage
+    .from('products')
+    .upload(filePath, file);
+
+  if (uploadError) {
+    console.error('Error uploading image:', uploadError);
+    throw uploadError;
+  }
+  
+  // Get public URL
+  const { data } = supabase.storage
+    .from('products')
+    .getPublicUrl(filePath);
+    
+  return data.publicUrl;
+}
+
+/**
+ * Add a product image record to the database
+ * @param productId - The ID of the product
+ * @param imageUrl - The URL of the uploaded image
+ * @param altText - Alternative text for the image
+ * @param position - Display position/order of the image
+ */
+export async function addProductImageRecord(
+  productId: string, 
+  imageUrl: string, 
+  altText?: string,
+  position: number = 0
+): Promise<void> {
+  const { error } = await supabase
+    .from('product_images')
+    .insert({
+      product_id: productId,
+      url: imageUrl,
+      alt_text: altText || null,
+      position
+    });
+
+  if (error) {
+    console.error('Error adding product image record:', error);
+    throw error;
+  }
+}
+
+/**
+ * Delete a product image from storage and the database
+ * @param imageId - The ID of the image record to delete
+ * @param imageUrl - The URL of the image to delete from storage
+ */
+export async function deleteProductImage(imageId: string, imageUrl: string): Promise<void> {
+  // Extract the file path from the URL
+  const urlParts = imageUrl.split('/');
+  const filePath = urlParts.slice(-2).join('/');
+  
+  // Delete from storage
+  const { error: storageError } = await supabase.storage
+    .from('products')
+    .remove([filePath]);
+    
+  if (storageError) {
+    console.error('Error removing image from storage:', storageError);
+    throw storageError;
+  }
+  
+  // Delete the database record
+  const { error: dbError } = await supabase
+    .from('product_images')
+    .delete()
+    .eq('id', imageId);
+    
+  if (dbError) {
+    console.error('Error removing image record from database:', dbError);
+    throw dbError;
+  }
+}
+
+/**
+ * Check if the storage bucket exists and is properly configured
+ * @returns Boolean indicating if the storage bucket is available
+ */
+export async function checkStorageBucket(): Promise<boolean> {
+  try {
+    // Try to list files in the bucket
+    const { error } = await supabase.storage
+      .from('products')
+      .list();
+      
+    // If we get an error about the bucket not existing, it's not configured
+    if (error && error.message.includes('bucket not found')) {
+      console.error('Products storage bucket not found:', error);
+      return false;
+    }
+    
+    // Otherwise the bucket exists
+    return true;
+  } catch (error) {
+    console.error('Error checking storage bucket:', error);
+    return false;
+  }
+}

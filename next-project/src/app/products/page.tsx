@@ -16,12 +16,17 @@ async function getProducts(
     `)
     .eq('is_published', true);
 
+  // Safely access parameters
+  const category = searchParams.category || '';
+  const sortField = searchParams.sort || 'created_at';
+  const sortOrder = searchParams.order === 'asc' ? true : false;
+
   // Apply category filter
-  if (searchParams.category) {
+  if (category) {
     const { data: categoryData } = await supabase
       .from('categories')
       .select('id')
-      .eq('slug', searchParams.category)
+      .eq('slug', category)
       .single();
 
     if (categoryData) {
@@ -30,9 +35,6 @@ async function getProducts(
   }
 
   // Apply sorting
-  const sortField = searchParams.sort || 'created_at';
-  const sortOrder = searchParams.order === 'asc' ? true : false;
-  
   const { data, error } = await query.order(sortField, { ascending: sortOrder });
 
   if (error) {
@@ -52,11 +54,36 @@ async function getCategories() {
   return data || [];
 }
 
+// Create helper function to build URL with params
+function buildFilterUrl(baseParams: {category?: string}, newParams: {sort?: string, order?: string}) {
+  const params = new URLSearchParams();
+  
+  if (baseParams.category) {
+    params.set('category', baseParams.category);
+  }
+  
+  if (newParams.sort) {
+    params.set('sort', newParams.sort);
+  }
+  
+  if (newParams.order) {
+    params.set('order', newParams.order);
+  }
+  
+  const queryString = params.toString();
+  return queryString ? `?${queryString}` : '';
+}
+
 export default async function ProductsPage({
   searchParams,
 }: {
   searchParams: { category?: string; sort?: string; order?: string };
 }) {
+  // Create serialized copies of search parameters that won't trigger the warning
+  const category = searchParams.category || '';
+  const sort = searchParams.sort || 'created_at';
+  const order = searchParams.order || 'desc';
+  
   const productsPromise = getProducts(searchParams);
   const categoriesPromise = getCategories();
   
@@ -79,21 +106,21 @@ export default async function ProductsPage({
                 <Link 
                   href="/products" 
                   className={`block px-2 py-1 rounded hover:bg-gray-100 ${
-                    !searchParams.category ? 'font-medium text-blue-600' : ''
+                    !category ? 'font-medium text-blue-600' : ''
                   }`}
                 >
                   All Categories
                 </Link>
               </li>
-              {categories.map((category) => (
-                <li key={category.slug}>
+              {categories.map((cat) => (
+                <li key={cat.slug}>
                   <Link 
-                    href={`/products?category=${category.slug}`} 
+                    href={`/products?category=${cat.slug}`} 
                     className={`block px-2 py-1 rounded hover:bg-gray-100 ${
-                      searchParams.category === category.slug ? 'font-medium text-blue-600' : ''
+                      category === cat.slug ? 'font-medium text-blue-600' : ''
                     }`}
                   >
-                    {category.name}
+                    {cat.name}
                   </Link>
                 </li>
               ))}
@@ -104,10 +131,10 @@ export default async function ProductsPage({
               <ul className="space-y-2">
                 <li>
                   <Link 
-                    href={`/products${searchParams.category ? `?category=${searchParams.category}&` : '?'}sort=created_at&order=desc`} 
+                    href={`/products${buildFilterUrl({category}, {sort: 'created_at', order: 'desc'})}`}
                     className={`block px-2 py-1 rounded hover:bg-gray-100 ${
-                      (!searchParams.sort || searchParams.sort === 'created_at') && 
-                      (!searchParams.order || searchParams.order === 'desc') ? 'font-medium text-blue-600' : ''
+                      (sort === 'created_at' || !sort) && 
+                      (order === 'desc' || !order) ? 'font-medium text-blue-600' : ''
                     }`}
                   >
                     Newest First
@@ -115,9 +142,9 @@ export default async function ProductsPage({
                 </li>
                 <li>
                   <Link 
-                    href={`/products${searchParams.category ? `?category=${searchParams.category}&` : '?'}sort=created_at&order=asc`} 
+                    href={`/products${buildFilterUrl({category}, {sort: 'created_at', order: 'asc'})}`}
                     className={`block px-2 py-1 rounded hover:bg-gray-100 ${
-                      searchParams.sort === 'created_at' && searchParams.order === 'asc' ? 'font-medium text-blue-600' : ''
+                      sort === 'created_at' && order === 'asc' ? 'font-medium text-blue-600' : ''
                     }`}
                   >
                     Oldest First
@@ -125,9 +152,9 @@ export default async function ProductsPage({
                 </li>
                 <li>
                   <Link 
-                    href={`/products${searchParams.category ? `?category=${searchParams.category}&` : '?'}sort=price&order=asc`} 
+                    href={`/products${buildFilterUrl({category}, {sort: 'price', order: 'asc'})}`}
                     className={`block px-2 py-1 rounded hover:bg-gray-100 ${
-                      searchParams.sort === 'price' && searchParams.order === 'asc' ? 'font-medium text-blue-600' : ''
+                      sort === 'price' && order === 'asc' ? 'font-medium text-blue-600' : ''
                     }`}
                   >
                     Price: Low to High
@@ -135,9 +162,9 @@ export default async function ProductsPage({
                 </li>
                 <li>
                   <Link 
-                    href={`/products${searchParams.category ? `?category=${searchParams.category}&` : '?'}sort=price&order=desc`} 
+                    href={`/products${buildFilterUrl({category}, {sort: 'price', order: 'desc'})}`}
                     className={`block px-2 py-1 rounded hover:bg-gray-100 ${
-                      searchParams.sort === 'price' && searchParams.order === 'desc' ? 'font-medium text-blue-600' : ''
+                      sort === 'price' && order === 'desc' ? 'font-medium text-blue-600' : ''
                     }`}
                   >
                     Price: High to Low
@@ -145,9 +172,9 @@ export default async function ProductsPage({
                 </li>
                 <li>
                   <Link 
-                    href={`/products${searchParams.category ? `?category=${searchParams.category}&` : '?'}sort=name&order=asc`} 
+                    href={`/products${buildFilterUrl({category}, {sort: 'name', order: 'asc'})}`}
                     className={`block px-2 py-1 rounded hover:bg-gray-100 ${
-                      searchParams.sort === 'name' && searchParams.order === 'asc' ? 'font-medium text-blue-600' : ''
+                      sort === 'name' && order === 'asc' ? 'font-medium text-blue-600' : ''
                     }`}
                   >
                     Name: A-Z
@@ -155,9 +182,9 @@ export default async function ProductsPage({
                 </li>
                 <li>
                   <Link 
-                    href={`/products${searchParams.category ? `?category=${searchParams.category}&` : '?'}sort=name&order=desc`} 
+                    href={`/products${buildFilterUrl({category}, {sort: 'name', order: 'desc'})}`}
                     className={`block px-2 py-1 rounded hover:bg-gray-100 ${
-                      searchParams.sort === 'name' && searchParams.order === 'desc' ? 'font-medium text-blue-600' : ''
+                      sort === 'name' && order === 'desc' ? 'font-medium text-blue-600' : ''
                     }`}
                   >
                     Name: Z-A

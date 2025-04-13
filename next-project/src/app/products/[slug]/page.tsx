@@ -139,8 +139,9 @@ export default async function ProductPage({ params }: { params: { slug: string }
             <div className="mb-6">
               <h2 className="font-semibold mb-2">Options</h2>
               <AddToCartButton 
-                product={product} 
-                variants={product.product_variants} 
+                productId={product.id}
+                isInStock={product.inventory_quantity > 0}
+                buttonText="Add to Cart"
               />
             </div>
           )}
@@ -148,7 +149,10 @@ export default async function ProductPage({ params }: { params: { slug: string }
           {/* Simple Add to Cart (if no variants) */}
           {(!product.product_variants || product.product_variants.length === 0) && (
             <div className="mb-6">
-              <AddToCartButton product={product} />
+              <AddToCartButton 
+                productId={product.id} 
+                isInStock={product.inventory_quantity > 0}
+              />
             </div>
           )}
 
@@ -161,7 +165,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
                 </p>
               )}
               <p className="text-sm text-gray-500">
-                Category: {product.categories?.name || 'Uncategorized'}
+                Category: {product.categories?.name || 'Not Categorized'}
               </p>
             </div>
           </div>
